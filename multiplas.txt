@@ -1,0 +1,118 @@
+CONCEPTUAL MODELLING
+
+Imagine that a store is keeping a record of its products and their respective reviews. According to the following conceptual diagram, select the option that doesn't satisfy the properties of the diagram.
+
+1) A product can have multiple reviews from distinct clients.
+2) A client can leave a review without buying the product.
+3) A client can have multiple reviews on the same product.
+4) A client can only buy one product.
+
+The multiplicities in the association class "Review" ensures that a product can have multiple reviews from different clients, but a client cannot leave multiple reviews on the same product. This happens because the association class with many to many multiplicities requires a pair of client and product. This ensures that the association between a client and a product through "Review" appears only once, therefore a client cannot leave multiple reviews on the same product.
+Since the relationship "bought" has multiplicity 1 to many (1 on the side of product), a client can only buy one product.
+
+
+
+
+UML TO RELATIONAL
+
+According to the follow conceptual model, what would be the the best relational model.
+
+1)
+
+Client(id, name)
+Employee(id, name, salary)
+Store(id, name, location, owner->Owner)
+ClientEmployeeStore(cId->Client, eId->Employee, sId->Store)
+Owner(id, name, salary)
+Address(id, name, city)
+OwnerHouseAddress(owner->Owner, address->Address)
+
+2)
+
+Client(id, name, eId->Employee, eId->Employee, sId->Store)
+Employee(id, name, salary,cId->Client, sId->Store)
+Store(id, name, location, owner->Owner, cId->Client, eId->Employee)
+Owner(id, name, salary)
+Address(id, name, city)
+OwnerHouseAddress(owner->Owner, address->Address)
+
+3)
+
+Client(id, name)
+Employee(id, name, salary)
+Store(id, name, location, owner->Owner)
+ClientEmployeeStore(cId->Client, eId->Employee, sId->Store)
+Owner(id, name, salary, address->Address)
+Address(id, name, city)
+
+4)
+
+Client(id, name)
+Employee(id, name, salary)
+Store(id, name, location)
+ClientEmployeeStore(cId->Client, eId->Employee, sId->Store)
+StoreOwner(owner->Owner, sId->Store)
+Owner(id, name, salary)
+Address(id, name, city)
+OwnerHouseAddress(owner->Owner, address->Address)
+
+Since the owner can have multiple houses, and his relationship with Address has a multiplicity of many to many, a Relation between them must be created, with both keys from Address and Owner.
+A store can only have one owner (1 to many), therefore there is no need in creating a Relation between owner and store. The only thing that must be done is have a foreign key  pointing to the owner (in this case its id) in the Store relation.
+Since this is an n-ary association, a Relation containing foregin keys from the 3 classes must be created. It makes sense to create a Relation instead of adding the other foreign keys in each Relation. Besides that, since their multiplicities are all many to many, all 3 foreign keys must also be primary keys.
+
+
+
+RELATIONAL DESIGN THEORY
+
+Given the relation R(A,B,C,D,E) and the dependencies set F={BC->A, E->CB, D->B, C->E}, select the correct option.
+
+1) A valid super key is D and the relation violates the BCNF normal form.
+2) A valid super key is E and the relation doesn't violate the BCNF normal form.
+3) A valid super key is C and the relation violates the BCNF normal form.
+4) A valid super key is B and the relation doesn't violate the BCNF normal form.
+
+In the options above, both C and E are valid super keys, since their computed closure is the complete set of attributes of the relation. However, the relation itself violates the BCNF normal form. A way to verify if a relation is in the BCNF, you can check if every dependency has a key in the left side. Taking the example of D->B, the closure of D is {D,B}, therefore D is not a key. Since D is in the left side of a functional dependency and is not a key, the relation is not on the BCNF normal form.
+
+
+SQL
+
+Given the sql instructions, choose the ouput that satisfies the constraints imposed.
+
+1) 
+First insert : No error
+Second insert: PRIMARY KEY constraint failed: pk
+Third insert : CHECK CONSTRAINT failed: valid_age
+Fourth insert: No error
+
+2) 
+First insert : No error
+Second insert: PRIMARY KEY constraint failed: pk
+Third insert : CHECK CONSTRAINT failed: valid_age
+Fourth insert: CHECK CONSTRAINT failed: valid_points
+
+3) 
+First insert : No error
+Second insert: UNIQUE constraint failed: person.id
+Third insert : CHECK CONSTRAINT failed: age >= 18
+Fourth insert: CHECK CONSTRAINT failed: valid_points
+
+4) 
+First insert : No error
+Second insert: UNIQUE constraint failed: person.id
+Third insert : CHECK CONSTRAINT failed: valid_age
+Fourth insert: CHECK CONSTRAINT failed: points > 0
+
+
+The correct way to use the CONSTRAINT keyword is the following: CONSTRAINT name <constraint itself>. Therefore, whenever the constraint that checks age fails, the constraint error message will show the name of the constraint, in this case CHECK CONSTRAINT failed: valid_age. In the attribute "points" case, it will not show "valid_points" since the CONSTRAINT keyword is after check. Instead of "valid_points" it will show the raw CHECK constraint, "CHECK CONSTRAINT failed: points > 0.
+Besides this, the constraint on primary key never appears with the constraint name, showing the message UNIQUE and then [class].[attribute], "UNIQUE CONSTRAINT failed: person.id".
+
+
+RELATIONAL ALGEBRA
+
+Given the following scheme,
+
+Person(id, name, age)
+InterestedIn(pid->Person, subject)
+
+
+

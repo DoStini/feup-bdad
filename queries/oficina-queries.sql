@@ -1,0 +1,133 @@
+-- SELECT *
+-- FROM Peca
+-- WHERE custoUnitario < 10
+--     AND codigo LIKE '%98%';
+-- --;
+-- SELECT Matricula
+-- FROM Reparacao
+--     JOIN Carro ON Reparacao.idCarro = Carro.idCarro
+-- WHERE dataFim LIKE '%2010-09-%';
+--
+-- SELECT Nome
+-- FROM Cliente
+--     JOIN (
+--         Carro
+--         JOIN (
+--             Reparacao
+--             NATURAL JOIN (
+--                 ReparacaoPeca
+--                 JOIN Peca ON ReparacaoPeca.idPeca = Peca.idPeca
+--             )
+--         ) ON Carro.idCarro = Reparacao.idCarro
+--     ) ON Cliente.idCliente = Carro.idCliente
+--
+--
+-- --;
+-- SELECT *
+-- FROM Cliente
+-- WHERE Cliente.idCliente NOT IN (
+--         SELECT idCliente
+--         FROM Carro
+--     );
+--;
+-- SELECT idCarro,
+--     count(*)
+-- FROM Reparacao
+-- GROUP BY idCarro
+-- UNION
+-- SELECT idCarro,
+--     0
+-- FROM Carro
+-- WHERE idCarro NOT IN (
+--         SELECT idCarro
+--         FROM Reparacao
+--     );
+--;
+-- SELECT Matricula,
+--     sum(julianday(dataFim) - julianday(dataInicio)) 'Ola dia feliz'
+-- FROM Reparacao
+--     JOIN Carro ON Carro.idCarro = Reparacao.idCarro
+-- GROUP BY Carro.idCarro; --
+-- SELECT avg(custoUnitario) as media,
+--     sum(custoUnitario) as custoTotal,
+--     sum(quantidade) as totalQnt,
+--     max(custoUnitario) as max,
+--     min(custoUnitario) as min
+-- FROM peca;
+-- DROP VIEW IF EXISTS especialidade_marca;
+-- CREATE VIEW especialidade_marca AS
+-- SELECT Marca.idMarca,
+--     Marca.nome as marca_nome,
+--     Funcionario.idEspecialidade,
+--     Especialidade.nome as espec_nome,
+--     count(*) as count
+-- FROM FuncionarioReparacao
+--     JOIN Funcionario ON FuncionarioReparacao.idFuncionario = Funcionario.idFuncionario
+--     JOIN Especialidade ON Funcionario.idEspecialidade = Especialidade.idEspecialidade
+--     JOIN Reparacao ON Reparacao.idReparacao = FuncionarioReparacao.idReparacao
+--     JOIN Carro on Carro.idCarro = Reparacao.idCarro
+--     JOIN Modelo on Carro.idModelo = Modelo.idModelo
+--     JOIN Marca on Marca.idMarca = Modelo.idMarca
+-- GROUP BY Funcionario.idEspecialidade,
+--     Marca.idMarca;
+-- SELECT marca_nome,
+--     espec_nome
+-- FROM especialidade_marca
+--     JOIN (
+--         SELECT idMarca as id,
+--             max(count) as max
+--         FROM especialidade_marca
+--         GROUP BY idMarca
+--     ) ON idMarca = id
+-- WHERE max = count;
+--
+
+
+-- DROP VIEW IF EXISTS preco_pecas;
+-- CREATE VIEW preco_pecas AS
+-- SELECT Reparacao.idReparacao,
+--     sum(ReparacaoPeca.quantidade * custoUnitario) as total_pecas
+-- FROM Reparacao
+--     JOIN ReparacaoPeca ON Reparacao.idReparacao = ReparacaoPeca.idReparacao
+--     JOIN Peca ON Peca.idPeca = ReparacaoPeca.idPeca
+-- GROUP BY Reparacao.idReparacao;
+-- --
+-- DROP VIEW IF EXISTS preco_funcs;
+-- CREATE VIEW preco_funcs AS
+-- SELECT Reparacao.idReparacao, sum(custoHorario * numHoras) as total_funcs
+-- FROM Reparacao
+--     JOIN FuncionarioReparacao ON Reparacao.idReparacao = FuncionarioReparacao.idReparacao
+--     JOIN Funcionario ON FuncionarioReparacao.idFuncionario = Funcionario.idFuncionario
+--     JOIN Especialidade ON Funcionario.idEspecialidade = Especialidade.idEspecialidade
+--     GROUP BY Reparacao.idReparacao;
+
+-- DROP VIEW IF EXISTS preco_total;
+-- CREATE VIEW preco_total AS
+-- SELECT *, sum(total_funcs + total_pecas) as total FROM 
+--     (SELECT preco_funcs.idReparacao, IFNULL(total_funcs, 0) AS total_funcs, IFNULL(total_pecas, 0) AS total_pecas FROM preco_funcs 
+--         LEFT JOIN preco_pecas ON preco_funcs.idReparacao=preco_pecas.idReparacao
+--         UNION
+--     SELECT preco_pecas.idReparacao, IFNULL(total_funcs, 0) as total_funcs, IFNULL(total_pecas, 0) as total_pecas FROM preco_pecas
+--     LEFT JOIN preco_funcs ON preco_funcs.idReparacao=preco_pecas.idReparacao)
+--     GROUP BY idReparacao;
+
+-- -- SELECT * FROM preco_total;
+-- -- SELECT * FROM preco_total WHERE total > 60;
+
+-- SELECT Cliente.idCliente, Cliente.nome FROM preco_total
+--     JOIN Reparacao USING (idReparacao)
+--     JOIN Carro USING (idCarro)
+--     JOIN Cliente ON Carro.idCliente=Cliente.idCliente
+--     WHERE total = (SELECT max(total) FROM preco_total);
+
+-- SELECT matricula, total, 2 as nice FROM preco_total
+--     JOIN Reparacao USING (idReparacao)
+--     JOIN Carro USING (idCarro)
+--     WHERE total = (SELECT DISTINCT total from preco_total ORDER BY total DESC LIMIT 1 OFFSET 1);
+
+--
+--
+--
+--
+
+
